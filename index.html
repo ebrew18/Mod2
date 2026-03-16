@@ -131,6 +131,50 @@
   .float-result { color: #6366f1; font-size: 13px; animation: scoreUp 1100ms ease forwards; }
 
   .hint { font-size: 10px; color: #bbb; text-align: center; margin-top: 8px; line-height: 1.4; }
+
+  .action-row {
+    display: flex; gap: 8px; margin-top: 8px; justify-content: center;
+  }
+  .btn-small {
+    padding: 5px 14px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer;
+    font-size: 11px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    background: #fff; color: #555; transition: all 120ms ease;
+  }
+  .btn-small:active { transform: scale(0.95); }
+  .btn-small.disabled { opacity: 0.35; pointer-events: none; }
+  .btn-small.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+
+  .history-panel {
+    width: 100%; max-width: 340px; margin-top: 8px;
+    background: #fff; border: 1px solid #e8e4e0; border-radius: 10px;
+    max-height: 160px; overflow-y: auto; padding: 8px 0;
+  }
+  .history-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 12px; font-size: 11px; font-family: 'DM Mono', monospace;
+  }
+  .history-item:nth-child(odd) { background: rgba(238,228,218,0.15); }
+  .history-desc { color: #555; }
+  .history-pts { font-weight: 700; min-width: 28px; text-align: right; }
+  .history-pts.pos { color: #22c55e; }
+  .history-pts.neg { color: #e74c3c; }
+  .history-pts.neutral { color: #aaa; }
+  .history-score { color: #999; font-size: 10px; min-width: 36px; text-align: right; }
+  .history-empty { padding: 12px; text-align: center; color: #ccc; font-size: 11px; }
+
+  .rules {
+    width: 100%; max-width: 340px; margin-top: 10px; padding: 0;
+    font-size: 11px; color: #888; line-height: 1.6;
+  }
+  .rules ol {
+    list-style: none; counter-reset: rule; padding: 0; margin: 0;
+  }
+  .rules li {
+    counter-increment: rule; padding: 2px 0;
+  }
+  .rules li::before {
+    content: counter(rule) ". "; font-weight: 700; color: #6366f1;
+  }
 </style>
 </head>
 <body>
@@ -150,6 +194,9 @@ const BOARD_PX = CELL * SIZE + 3 * (SIZE + 1);
 // ── State ──
 let grid, selected, score, pointTarget, level, gameState, opsUsed;
 let boardEl;
+let undoState = null; // snapshot for undo
+let moveHistory = []; // log of operations
+let showHistory = false; // toggle history panel
 
 // ── Colors ──
 function numColor(v) {
@@ -166,6 +213,26 @@ function numColor(v) {
     9: { bg: "#edc53f", c: "#fff" },
   };
   return m[v] || { bg: "#3c3a32", c: "#fff" };
+}
+
+// ── Undo system ──
+function saveSnapshot() {
+  undoState = {
+    grid: grid.map(row => row.map(cell => ({ ...cell }))),
+    score, opsUsed, selected
+  };
+}
+
+function undo() {
+  if (!undoState || gameState !== "playing") return;
+  grid = undoState.grid;
+  score = undoState.score;
+  opsUsed = undoState.opsUsed;
+  selected = null;
+  // Remove last history entry
+  if (moveHistory.length) moveHistory.pop();
+  undoState = null;
+  render();
 }
 
 // ── Init ──
@@ -186,6 +253,9 @@ function initGame() {
   level = 1;
   opsUsed = 0;
   pointTarget = POINT_TARGET;
+  undoState = null;
+  moveHistory = [];
+  showHistory = false;
   gameState = "menu";
   render();
 }
@@ -200,6 +270,9 @@ function nextLevel() {
   pointTarget = POINT_TARGET + (level - 1) * 5;
   score = 0;
   opsUsed = 0;
+  undoState = null;
+  moveHistory = [];
+  showHistory = false;
   // Regenerate board
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
@@ -293,11 +366,13 @@ function replaceWithDigits(r, c, result) {
 }
 
 // Fill temporary empty cells with new numbers/ops. "blank" cells from 0 results persist.
+// Replacement tiles have a higher 50% chance of being operations.
+const REPLACE_OP_RATIO = 0.5;
 function fillEmptyCells() {
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
       if (grid[r][c].type === "empty") {
-        if (Math.random() < OP_RATIO) {
+        if (Math.random() < REPLACE_OP_RATIO) {
           grid[r][c] = { type: "operation", op: OP_SYMBOLS[Math.floor(Math.random() * 4)] };
         } else {
           grid[r][c] = { type: "number", value: Math.floor(Math.random() * 9) + 1, isNew: true };
@@ -382,6 +457,8 @@ function handleClick(r, c) {
 
     // Number → empty/blank: move into it
     if ((cell.type === "empty" || cell.type === "blank") && sel.type === "number") {
+      saveSnapshot();
+      moveHistory.push({ type: "move", desc: `Moved ${sel.value} to [${r},${c}]`, points: 0, scoreAfter: score });
       grid[r][c] = { ...sel, isNew: false };
       if (cell.type === "blank") {
         // Moving into a blank: leave a blank behind (blanks persist)
@@ -397,6 +474,8 @@ function handleClick(r, c) {
 
     // Number → operation: lock it
     if (cell.type === "operation" && sel.type === "number") {
+      saveSnapshot();
+      moveHistory.push({ type: "lock", desc: `Locked ${sel.value} onto ${cell.op}`, points: 0, scoreAfter: score });
       grid[r][c] = { type: "locked", op: cell.op, value: sel.value };
       grid[sr][sc] = { type: "empty" };
       fillEmptyCells();
@@ -406,6 +485,7 @@ function handleClick(r, c) {
 
     // Number → locked: complete the operation
     if (cell.type === "locked" && sel.type === "number") {
+      saveSnapshot();
       const result = doOp(cell.value, sel.value, cell.op);
       const opSymbol = cell.op;
       const a = cell.value, b = sel.value;
@@ -415,16 +495,18 @@ function handleClick(r, c) {
       if (result !== null && result !== undefined && result >= 0) {
         const absResult = Math.abs(Math.round(result));
         const isEven = absResult % 2 === 0;
+        let pts = 0;
 
         if (isEven) {
-          score++;
+          score++; pts = +1;
           showFloat(r, c, `+1`, "float-plus", 18);
         } else {
-          score--;
+          score--; pts = -1;
           showFloat(r, c, `−1`, "float-minus", 18);
         }
 
         showFloat(r, c, `${a} ${opSymbol} ${b} = ${absResult}`, "float-result", 13, -24);
+        moveHistory.push({ type: "op", desc: `${a} ${opSymbol} ${b} = ${absResult}`, points: pts, scoreAfter: score, even: isEven });
 
         replaceWithDigits(r, c, absResult);
       } else {
@@ -432,6 +514,7 @@ function handleClick(r, c) {
         score--;
         showFloat(r, c, `−1`, "float-minus", 18);
         grid[r][c] = { type: "operation", op: opSymbol };
+        moveHistory.push({ type: "op", desc: `${a} ${opSymbol} ${b} = error`, points: -1, scoreAfter: score, even: false });
       }
 
       selected = null;
@@ -629,10 +712,40 @@ function render() {
 
   h += `</div>`; // board-wrap
 
-  h += `<div class="hint">
-    Tap number → adjacent <strong style="color:#6366f1">op</strong> → adjacent number to combine<br>
-    Results split into digits · Zero = open space to move through
+  // Action buttons
+  h += `<div class="action-row">
+    <button class="btn-small ${undoState ? '' : 'disabled'}" onclick="undo()">↩ Undo</button>
+    <button class="btn-small ${showHistory ? 'active' : ''}" onclick="showHistory=!showHistory;render();">📋 History</button>
   </div>`;
+
+  // History panel
+  if (showHistory) {
+    h += `<div class="history-panel">`;
+    if (moveHistory.length === 0) {
+      h += `<div class="history-empty">No moves yet</div>`;
+    } else {
+      for (let i = moveHistory.length - 1; i >= 0; i--) {
+        const m = moveHistory[i];
+        const ptsClass = m.points > 0 ? 'pos' : m.points < 0 ? 'neg' : 'neutral';
+        const ptsStr = m.points > 0 ? `+${m.points}` : m.points < 0 ? `${m.points}` : '—';
+        h += `<div class="history-item">
+          <span class="history-desc">${m.desc}</span>
+          <span class="history-pts ${ptsClass}">${ptsStr}</span>
+          <span class="history-score">= ${m.scoreAfter}</span>
+        </div>`;
+      }
+    }
+    h += `</div>`;
+  }
+
+  // Rules
+  h += `<div class="rules"><ol>
+    <li>Tap a <strong>number</strong>, then tap an adjacent <strong style="color:#6366f1">operation</strong> (+, −, ×, ÷) to lock it in</li>
+    <li>Tap another adjacent <strong>number</strong> to complete the math — the result splits into digit tiles</li>
+    <li><span style="color:#22c55e;font-weight:600">Even results</span> score +1 point, <span style="color:#e74c3c;font-weight:600">odd results</span> cost −1 point</li>
+    <li>A result of <strong>0</strong> creates a blank space — move tiles through blanks to reposition</li>
+    <li>Reach the <strong style="color:#6366f1">goal score</strong> to advance — if you run out of operations, it's game over</li>
+  </ol></div>`;
 
   app.innerHTML = h;
   boardEl = document.getElementById("board");
