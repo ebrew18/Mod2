@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Mathle</title>
+<title>Opsmash</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -52,7 +52,7 @@
     display: flex; gap: 14px; justify-content: center; margin-bottom: 6px;
     font-size: 11px; color: #888; font-weight: 500;
   }
-  .rule-even { color: #22c55e; }
+  .rule-even { color: #3b82f6; }
   .rule-odd { color: #e74c3c; }
 
   .board-wrap { position: relative; }
@@ -126,8 +126,9 @@
     position: absolute; font-weight: 800; pointer-events: none; z-index: 20;
     font-family: 'DM Mono', monospace;
   }
-  .float-plus { color: #22c55e; animation: scoreUp 900ms ease forwards; }
+  .float-plus { color: #3b82f6; animation: scoreUp 900ms ease forwards; }
   .float-minus { color: #e74c3c; animation: scoreDown 900ms ease forwards; }
+  .float-zero { color: #8b5cf6; animation: scoreUp 900ms ease forwards; }
   .float-result { color: #6366f1; font-size: 13px; animation: scoreUp 1100ms ease forwards; }
 
   .hint { font-size: 10px; color: #bbb; text-align: center; margin-top: 8px; line-height: 1.4; }
@@ -156,7 +157,7 @@
   .history-item:nth-child(odd) { background: rgba(238,228,218,0.15); }
   .history-desc { color: #555; }
   .history-pts { font-weight: 700; min-width: 28px; text-align: right; }
-  .history-pts.pos { color: #22c55e; }
+  .history-pts.pos { color: #3b82f6; }
   .history-pts.neg { color: #e74c3c; }
   .history-pts.neutral { color: #aaa; }
   .history-score { color: #999; font-size: 10px; min-width: 36px; text-align: right; }
@@ -197,6 +198,7 @@ let boardEl;
 let undoState = null; // snapshot for undo
 let moveHistory = []; // log of operations
 let showHistory = false; // toggle history panel
+let vibrateOn = true; // vibration toggle
 
 // ── Colors ──
 function numColor(v) {
@@ -497,12 +499,19 @@ function handleClick(r, c) {
         const isEven = absResult % 2 === 0;
         let pts = 0;
 
-        if (isEven) {
+        if (absResult === 0) {
+          // Zero result: +1 point (even), show purple 0
+          score++; pts = +1;
+          showFloat(r, c, `0`, "float-zero", 22);
+          vibrate([30, 50, 30]);
+        } else if (isEven) {
           score++; pts = +1;
           showFloat(r, c, `+1`, "float-plus", 18);
+          vibrate([40]);
         } else {
           score--; pts = -1;
           showFloat(r, c, `−1`, "float-minus", 18);
+          vibrate([80]);
         }
 
         showFloat(r, c, `${a} ${opSymbol} ${b} = ${absResult}`, "float-result", 13, -24);
@@ -513,6 +522,7 @@ function handleClick(r, c) {
         // Bad division or error — lose a point
         score--;
         showFloat(r, c, `−1`, "float-minus", 18);
+        vibrate([80]);
         grid[r][c] = { type: "operation", op: opSymbol };
         moveHistory.push({ type: "op", desc: `${a} ${opSymbol} ${b} = error`, points: -1, scoreAfter: score, even: false });
       }
@@ -567,6 +577,13 @@ function getValidMoves() {
   return moves;
 }
 
+// ── Vibration ──
+function vibrate(pattern) {
+  if (vibrateOn && navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
+}
+
 // ── Floats ──
 function showFloat(r, c, text, cls, size, offsetY = 0) {
   if (!boardEl) return;
@@ -586,7 +603,7 @@ function render() {
   const valid = getValidMoves();
   let h = "";
 
-  h += `<div class="title">Mathle</div>`;
+  h += `<div class="title">Opsmash</div>`;
   h += `<div class="subtitle">even gains · odd drains</div>`;
 
   h += `<div class="info-row">
@@ -670,11 +687,11 @@ function render() {
   if (gameState === "menu") {
     h += `<div class="overlay">
       <div class="overlay-icon">🧮</div>
-      <div class="overlay-title">Mathle</div>
+      <div class="overlay-title">Opsmash</div>
       <div class="overlay-text">
         Tap a <strong>number</strong>, then tap an adjacent <span style="color:#6366f1;font-weight:600">operation</span> to lock it in.
         Tap another adjacent number to complete the math.<br><br>
-        <span style="color:#22c55e;font-weight:600">Even result</span> → +1 point &nbsp;
+        <span style="color:#3b82f6;font-weight:600">Even result</span> → +1 point &nbsp;
         <span style="color:#e74c3c;font-weight:600">Odd result</span> → −1 point<br>
         <strong>Result of 0</strong> → opens a space to move through!
       </div>
@@ -716,6 +733,7 @@ function render() {
   h += `<div class="action-row">
     <button class="btn-small ${undoState ? '' : 'disabled'}" onclick="undo()">↩ Undo</button>
     <button class="btn-small ${showHistory ? 'active' : ''}" onclick="showHistory=!showHistory;render();">📋 History</button>
+    <button class="btn-small ${vibrateOn ? 'active' : ''}" onclick="vibrateOn=!vibrateOn;render();">📳 Vibrate</button>
   </div>`;
 
   // History panel
@@ -742,7 +760,7 @@ function render() {
   h += `<div class="rules"><ol>
     <li>Tap a <strong>number</strong>, then tap an adjacent <strong style="color:#6366f1">operation</strong> (+, −, ×, ÷) to lock it in</li>
     <li>Tap another adjacent <strong>number</strong> to complete the math — the result splits into digit tiles</li>
-    <li><span style="color:#22c55e;font-weight:600">Even results</span> score +1 point, <span style="color:#e74c3c;font-weight:600">odd results</span> cost −1 point</li>
+    <li><span style="color:#3b82f6;font-weight:600">Even results</span> score +1 point, <span style="color:#e74c3c;font-weight:600">odd results</span> cost −1 point</li>
     <li>A result of <strong>0</strong> creates a blank space — move tiles through blanks to reposition</li>
     <li>Reach the <strong style="color:#6366f1">goal score</strong> to advance — if you run out of operations, it's game over</li>
   </ol></div>`;
