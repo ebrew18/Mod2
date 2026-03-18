@@ -2,311 +2,779 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PriceHawk</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mod2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:#000;color:#fff;font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;overflow-x:hidden}
-button{font-family:inherit;cursor:pointer}
-input,select{font-family:inherit}
-.view{display:none;min-height:100vh;padding-bottom:40px}
-.view.active{display:block}
-.hdr{display:flex;align-items:center;padding:16px 20px 8px;gap:12}
-.hdr-between{justify-content:space-between}
-.back-btn{background:none;border:none;color:#fff;font-size:28px;padding:0;line-height:1}
-.card{background:#1c1c1e;border-radius:14px;padding:16px 18px;margin-bottom:10px}
-.card-press{cursor:pointer;transition:transform 0.1s}
-.pill{padding:8px 16px;border-radius:20px;border:none;font-size:13px;font-weight:600;white-space:nowrap}
-.pill-on{background:#2c2c2e}
-.pill-off{background:transparent;color:#8e8e93}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700}
-.row{display:flex;justify-content:space-between;align-items:center}
-.flex{display:flex}
-.gap8{gap:8px}
-.gap6{gap:6px}
-.gap10{gap:10px}
-.gap12{gap:12px}
-.gap16{gap:16px}
-.f1{flex:1;min-width:0}
-.shrink0{flex-shrink:0}
-.wrap{flex-wrap:wrap}
-.col{flex-direction:column}
-.center{align-items:center}
-.right{text-align:right}
-.ml12{margin-left:12px}
-.mb2{margin-bottom:2px}
-.mb4{margin-bottom:4px}
-.mb8{margin-bottom:8px}
-.mb10{margin-bottom:10px}
-.mb12{margin-bottom:12px}
-.mb14{margin-bottom:14px}
-.mb16{margin-bottom:16px}
-.mt2{margin-top:2px}
-.mt4{margin-top:4px}
-.mt8{margin-top:8px}
-.mt10{margin-top:10px}
-.pt14{padding-top:14px}
-.ellip{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dim{color:#8e8e93}
-.dim2{color:#636366}
-.green{color:#34d399}
-.red{color:#ff453a}
-.amber{color:#ff9f0a}
-.bold{font-weight:700}
-.semi{font-weight:600}
-.strike{text-decoration:line-through;color:#636366}
-.ital{font-style:italic}
-.s11{font-size:11px}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s15{font-size:15px}.s17{font-size:17px}.s20{font-size:20px}.s22{font-size:22px}.s24{font-size:24px}.s48{font-size:48px}
-.circ{border-radius:50%;display:flex;align-items:center;justify-content:center}
-.sep{border-top:1px solid #2c2c2e}
-.lsp{letter-spacing:-0.03em}
-.lsp2{letter-spacing:-0.02em}
-.ucase{text-transform:uppercase;letter-spacing:0.05em}
-.action-row{display:flex;gap:8px}
-.action-btn{flex:1;padding:11px 0;border-radius:10px;font-size:13px;font-weight:700;border:none}
-.action-ghost{flex:1;padding:11px 0;border-radius:10px;font-size:13px;font-weight:600;border:1px solid #2c2c2e;background:transparent}
-.tag{display:inline-block;margin-top:3px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
-.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
-canvas{display:block;width:100%}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%; overflow: auto;
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: #faf8f5; user-select: none; touch-action: manipulation;
+  }
+
+  @keyframes popIn { 0% { transform: scale(0); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  @keyframes shimmer { 0% { box-shadow: 0 0 0 0 rgba(99,102,241,0.3); } 100% { box-shadow: 0 0 8px 3px rgba(99,102,241,0.15); } }
+  @keyframes scoreUp { 0% { opacity:1; transform: translateY(0) scale(1); } 100% { opacity:0; transform: translateY(-36px) scale(1.3); } }
+  @keyframes scoreDown { 0% { opacity:1; transform: translateY(0) scale(1); } 100% { opacity:0; transform: translateY(-36px) scale(1.3); } }
+  @keyframes shakeX { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+  .container {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start; min-height: 100vh; padding: 14px 8px;
+  }
+  .title { font-size: 28px; font-weight: 800; letter-spacing: -1.5px; color: #1a1a1a; }
+  .subtitle { font-size: 11px; font-weight: 500; color: #999; letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+
+  .info-row { display: flex; gap: 8px; margin: 10px 0 6px; align-items: stretch; }
+  .stat-box {
+    display: flex; flex-direction: column; align-items: center;
+    background: #f0eded; border-radius: 10px; padding: 5px 14px; min-width: 60px;
+  }
+  .stat-label { font-size: 9px; font-weight: 600; color: #aaa; letter-spacing: 1px; text-transform: uppercase; }
+  .stat-value { font-size: 20px; font-weight: 700; color: #1a1a1a; font-family: 'DM Mono', monospace; }
+  .stat-value.negative { color: #e74c3c; }
+
+  .target-box {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(99,102,241,0.08); border: 1.5px solid rgba(99,102,241,0.2);
+    border-radius: 10px; padding: 5px 18px; min-width: 80px;
+  }
+  .target-label { font-size: 9px; font-weight: 600; color: #6366f1; letter-spacing: 1px; text-transform: uppercase; }
+  .target-value { font-size: 22px; font-weight: 800; color: #6366f1; font-family: 'DM Mono', monospace; }
+
+  .progress-wrap { width: 100%; max-width: 340px; margin: 4px 0 8px; }
+  .progress-bar { height: 6px; background: #e8e4e0; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 300ms ease, background 300ms ease; }
+
+  .rule-row {
+    display: flex; gap: 14px; justify-content: center; margin-bottom: 6px;
+    font-size: 11px; color: #888; font-weight: 500;
+  }
+  .rule-even { color: #3b82f6; }
+  .rule-odd { color: #e74c3c; }
+
+  .board-wrap { position: relative; }
+  .board { display: grid; gap: 3px; background: #cdc1b4; border-radius: 10px; padding: 3px; }
+
+  .cell {
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-family: 'DM Mono', monospace; cursor: pointer;
+    transition: transform 80ms ease; position: relative;
+  }
+  .cell:active { transform: scale(0.93); }
+
+  .cell-number { border: 2px solid transparent; }
+
+  .cell-empty { background: rgba(238,228,218,0.2); border: 2px solid transparent; cursor: default; }
+  .cell-empty.valid-move {
+    background: rgba(99,102,241,0.08); border: 2px dashed rgba(99,102,241,0.3); cursor: pointer;
+  }
+
+  .cell-blank {
+    background: rgba(238,228,218,0.12); border: 2px dotted rgba(180,170,160,0.4);
+    cursor: default;
+  }
+  .cell-blank.valid-move {
+    background: rgba(99,102,241,0.1); border: 2px dashed rgba(99,102,241,0.4); cursor: pointer;
+  }
+  .cell-number.selected { border-color: #6366f1 !important; box-shadow: 0 0 10px rgba(99,102,241,0.4); z-index: 2; }
+  .cell-number.new-tile { animation: popIn 250ms ease; }
+  .cell-number.valid-move { border-color: rgba(99,102,241,0.4) !important; }
+
+  .cell-operation {
+    background: rgba(99,102,241,0.1); border: 2px dashed rgba(99,102,241,0.4);
+    color: #6366f1;
+  }
+  .cell-operation.valid-move {
+    background: rgba(99,102,241,0.22); border-color: rgba(99,102,241,0.7);
+    animation: shimmer 700ms ease infinite alternate;
+  }
+
+  .cell-locked {
+    background: rgba(99,102,241,0.18); border: 2px solid rgba(99,102,241,0.5);
+    color: #6366f1; flex-direction: column; line-height: 1;
+  }
+  .cell-locked.valid-move {
+    background: rgba(99,102,241,0.3); border-color: #6366f1;
+    animation: shimmer 500ms ease infinite alternate;
+  }
+
+  .locked-num { font-weight: 800; color: #1a1a1a; }
+  .locked-op { font-weight: 600; color: #6366f1; }
+
+  .overlay {
+    position: absolute; inset: 0; background: rgba(250,248,245,0.92);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 10px; z-index: 10; backdrop-filter: blur(4px);
+  }
+  .overlay-icon { font-size: 40px; margin-bottom: 8px; }
+  .overlay-title { font-size: 24px; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+  .overlay-text {
+    font-size: 12px; color: #777; margin-bottom: 14px; text-align: center;
+    max-width: 260px; line-height: 1.55; padding: 0 12px;
+  }
+  .btn {
+    padding: 8px 24px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary { background: #1a1a1a; color: #fff; }
+  .btn-secondary { background: transparent; color: #1a1a1a; border: 1px solid #ddd; margin-top: 6px; }
+
+  .float-text {
+    position: absolute; font-weight: 800; pointer-events: none; z-index: 20;
+    font-family: 'DM Mono', monospace;
+  }
+  .float-plus { color: #3b82f6; animation: scoreUp 900ms ease forwards; }
+  .float-minus { color: #e74c3c; animation: scoreDown 900ms ease forwards; }
+  .float-zero { color: #8b5cf6; animation: scoreUp 900ms ease forwards; }
+  .float-result { color: #6366f1; font-size: 13px; animation: scoreUp 1100ms ease forwards; }
+
+  .hint { font-size: 10px; color: #bbb; text-align: center; margin-top: 8px; line-height: 1.4; }
+
+  .action-row {
+    display: flex; gap: 8px; margin-top: 8px; justify-content: center;
+  }
+  .btn-small {
+    padding: 5px 14px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer;
+    font-size: 11px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    background: #fff; color: #555; transition: all 120ms ease;
+  }
+  .btn-small:active { transform: scale(0.95); }
+  .btn-small.disabled { opacity: 0.35; pointer-events: none; }
+  .btn-small.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+
+  .history-panel {
+    width: 100%; max-width: 340px; margin-top: 8px;
+    background: #fff; border: 1px solid #e8e4e0; border-radius: 10px;
+    max-height: 160px; overflow-y: auto; padding: 8px 0;
+  }
+  .history-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 12px; font-size: 11px; font-family: 'DM Mono', monospace;
+  }
+  .history-item:nth-child(odd) { background: rgba(238,228,218,0.15); }
+  .history-desc { color: #555; }
+  .history-pts { font-weight: 700; min-width: 28px; text-align: right; }
+  .history-pts.pos { color: #3b82f6; }
+  .history-pts.neg { color: #e74c3c; }
+  .history-pts.neutral { color: #aaa; }
+  .history-score { color: #999; font-size: 10px; min-width: 36px; text-align: right; }
+  .history-empty { padding: 12px; text-align: center; color: #ccc; font-size: 11px; }
+
+  .rules {
+    width: 100%; max-width: 340px; margin-top: 10px; padding: 0;
+    font-size: 11px; color: #888; line-height: 1.6;
+  }
+  .rules ol {
+    list-style: none; counter-reset: rule; padding: 0; margin: 0;
+  }
+  .rules li {
+    counter-increment: rule; padding: 2px 0;
+  }
+  .rules li::before {
+    content: counter(rule) ". "; font-weight: 700; color: #6366f1;
+  }
 </style>
 </head>
 <body>
-
-<div id="home" class="view active">
-  <div class="hdr hdr-between">
-    <span class="s20 bold lsp"><span class="green">&#9670;</span> PriceHawk</span>
-    <div class="flex gap8 center">
-      <button id="bell-btn" onclick="showView('alerts')" style="background:#1c1c1e;border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:16px;position:relative;display:flex;align-items:center;justify-content:center">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span id="bell-badge" style="display:none;position:absolute;top:-2px;right:-2px;background:#ff453a;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;border:2px solid #000"></span>
-      </button>
-      <button onclick="toggleAdd()" style="background:#1c1c1e;border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:20px">+</button>
-    </div>
-  </div>
-  <div style="padding:4px 20px 12px"><div style="background:#1c1c1e;border-radius:10px;padding:10px 14px"><input placeholder="Search Products" style="background:transparent;border:none;color:#8e8e93;font-size:16px;width:100%;outline:none"></div></div>
-  <div id="add-form" style="display:none;padding:0 20px 16px"></div>
-  <div id="product-list" style="padding:0 20px"></div>
-</div>
-
-<div id="detail" class="view">
-  <div class="hdr"><button class="back-btn" onclick="showView('home')">&lt;</button><span class="s17 semi">Product</span></div>
-  <div id="detail-content"></div>
-</div>
-
-<div id="alerts" class="view">
-  <div class="hdr">
-    <button class="back-btn" onclick="showView('home')">&lt;</button>
-    <span class="s17 semi">Alerts</span>
-    <div style="flex:1"></div>
-    <span id="alert-count" class="s12 bold" style="background:#ff453a;color:#fff;padding:3px 10px;border-radius:10px"></span>
-  </div>
-  <div id="alert-filters" class="flex gap6" style="padding:8px 20px 16px;overflow-x:auto"></div>
-  <div id="alert-summary" style="padding:0 20px 12px"></div>
-  <div id="alert-list" style="padding:0 20px"></div>
-</div>
+<div class="container" id="app"></div>
 
 <script>
-var seed=function(s){return function(){s=(s*16807)%2147483647;return(s-1)/2147483646}};
-var genH=function(base,days,sd){var r=seed(sd),h=[],p=base*(1+(r()-0.5)*0.1),n=Date.now();for(var i=days;i>=0;i--){p=Math.max(base*0.6,Math.min(base*1.4,p+(r()-0.47)*base*0.035));h.push({d:new Date(n-i*864e5).toISOString().split("T")[0],p:Math.round(p*100)/100})}return h};
-var SHIPS=[0,4.99,5.95,3.49,6.99,7.50,0,2.99,0,5.49,4.25,0,3.99,8.50,0];
-var NAMES=["CedarCraft Studio","The Artisan Nook","Maple & Thread Co.","Rustic Ember Goods","Willow & Pine Shop","Handmade by Lena","The Cozy Kiln","Oakwood Collective","Sunflower & Sage","Birchwood Mercantile","Little Fox Pottery","The Wandering Maker","Clover Hill Crafts","Moonstone Atelier","River Stone Designs"];
-var mkC=function(bp){return NAMES.map(function(nm,i){return{id:"c"+i,store:nm,cp:Math.round((bp*(0.7+i*0.04+Math.sin(i)*0.08))*100)/100,ship:SHIPS[i],hist:genH(bp*(0.75+i*0.03),30,(i+1)*137)}})};
-var PRODS=[
-  {id:"p1",name:"Handmade Ceramic Mug \u2014 Earth Tones",plat:"Etsy",yp:28,ys:0,hist:genH(28,30,99),comps:mkC(28)},
-  {id:"p2",name:"Minimalist Leather Wallet \u2014 Slim Bifold",plat:"Amazon",yp:45,ys:5.99,hist:genH(45,30,200),comps:mkC(45)},
-  {id:"p3",name:"Soy Candle Set \u2014 Lavender & Sage (3pk)",plat:"Shopify",yp:34,ys:0,hist:genH(34,30,333),comps:mkC(34)},
-  {id:"p4",name:"Macrame Wall Hanging \u2014 Boho Large",plat:"Etsy",yp:62,ys:8.99,hist:genH(62,30,444),comps:mkC(62)}
-];
-var n=Date.now();
-var ALERTS=[
-  {id:"a1",pn:"Handmade Ceramic Mug",st:"CedarCraft Studio",tp:"drop",op:26.5,np:22.99,sh:0,cf:94,rs:"Consistent 7-day downward trend. No sale language.",ts:new Date(n-18e5).toISOString(),status:"new"},
-  {id:"a2",pn:"Minimalist Leather Wallet",st:"Rustic Ember Goods",tp:"promo",op:44,np:33,sh:4.99,cf:87,rs:"\"25% OFF\" badge detected. Likely temporary.",ts:new Date(n-72e5).toISOString(),status:"new"},
-  {id:"a3",pn:"Soy Candle Set",st:"Willow & Pine Shop",tp:"drop",op:34,np:29.5,sh:5.95,cf:91,rs:"Price reduced, no promo indicators. New baseline.",ts:new Date(n-144e5).toISOString(),status:"new"},
-  {id:"a4",pn:"Handmade Ceramic Mug",st:"The Cozy Kiln",tp:"noise",op:30,np:29.85,sh:3.49,cf:72,rs:"Change < 1%. Rounding or A/B test. Auto-dismissed.",ts:new Date(n-288e5).toISOString(),status:"dismissed"},
-  {id:"a5",pn:"Macrame Wall Hanging",st:"Moonstone Atelier",tp:"drop",op:65,np:54.99,sh:0,cf:96,rs:"Significant sustained drop. 3 reprices this week.",ts:new Date(n-432e5).toISOString(),status:"new"},
-  {id:"a6",pn:"Minimalist Leather Wallet",st:"Birchwood Mercantile",tp:"promo",op:48,np:38.4,sh:0,cf:82,rs:"\"SPRING20\" coupon visible. Seasonal promo.",ts:new Date(n-648e5).toISOString(),status:"new"},
-  {id:"a7",pn:"Soy Candle Set",st:"Little Fox Pottery",tp:"noise",op:36,np:35.8,sh:2.99,cf:65,rs:"Micro-fluctuation. No pattern. Auto-dismissed.",ts:new Date(n-864e5).toISOString(),status:"dismissed"}
-];
+const SIZE = 5;
+const OP_RATIO = 0.25; // ~25% of tiles are operations
+const OP_SYMBOLS = ['+', '−', '×', '÷'];
+const POINT_TARGET = 15;
 
-var state={selProd:null,selComps:{},visCount:5,period:"1M",showLanded:true,aFilt:"all"};
+// ── Responsive sizing ──
+const vw = Math.min(window.innerWidth - 24, 420);
+const CELL = Math.floor((vw - 3 * (SIZE + 1)) / SIZE);
+const BOARD_PX = CELL * SIZE + 3 * (SIZE + 1);
 
-function $(id){return document.getElementById(id)}
-function showView(v){document.querySelectorAll('.view').forEach(function(el){el.classList.remove('active')});$(v).classList.add('active');if(v==='home')renderHome();if(v==='alerts')renderAlerts();if(v==='detail')renderDetail()}
-function chg(h){if(h.length<2)return{a:0,pc:0};var c=h[h.length-1].p,p=h[h.length-2].p;return{a:c-p,pc:((c-p)/p)*100}}
-function ago(ts){var d=Date.now()-new Date(ts).getTime(),m=Math.floor(d/60000);if(m<60)return m+"m ago";var h=Math.floor(m/60);return h<24?h+"h ago":Math.floor(h/24)+"d ago"}
-function miniSVG(data,up){if(!data||data.length<2)return'';var W=360,H=50,ps=data.map(function(x){return x.p}),mn=Math.min.apply(null,ps),mx=Math.max.apply(null,ps),rg=mx-mn||1;var pts=ps.map(function(p,i){return(i/(ps.length-1))*W+","+(H-((p-mn)/rg)*(H-6)-3)}).join(" ");var c=up?"#34d399":"#ff453a";var gid="g"+Math.random().toString(36).slice(2,7);return'<svg viewBox="0 0 '+W+" "+H+'" style="width:100%;height:50px;display:block"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+c+'" stop-opacity="0.15"/><stop offset="100%" stop-color="'+c+'" stop-opacity="0"/></linearGradient></defs><polygon points="0,'+H+" "+pts+" "+W+","+H+'" fill="url(#'+gid+')"/><polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
-function tpS(tp){if(tp==="drop")return{l:"Price Drop",c:"#ff453a",bg:"rgba(255,69,58,0.12)",i:"\u2193"};if(tp==="promo")return{l:"Promo Detected",c:"#ff9f0a",bg:"rgba(255,159,10,0.12)",i:"%"};return{l:"Noise",c:"#636366",bg:"rgba(99,99,102,0.12)",i:"~"}}
-function stB(s){if(s==="matched")return{l:"Price matched",c:"#34d399",bg:"rgba(52,211,153,0.12)"};if(s==="snoozed")return{l:"Snoozed 7d",c:"#5e5ce6",bg:"rgba(94,92,230,0.12)"};if(s==="promo")return{l:"Marked as promo",c:"#ff9f0a",bg:"rgba(255,159,10,0.12)"};if(s==="dismissed")return{l:"Auto-dismissed",c:"#636366",bg:"rgba(99,99,102,0.12)"};return null}
+// ── State ──
+let grid, selected, score, pointTarget, level, gameState, opsUsed;
+let boardEl;
+let undoState = null; // snapshot for undo
+let moveHistory = []; // log of operations
+let showHistory = false; // toggle history panel
 
-function toggleAdd(){var f=$('add-form');f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')f.innerHTML='<div class="card" style="padding:20px"><div class="s16 bold mb16">Track New Product</div><input placeholder="Product name" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid #2c2c2e;background:#000;color:#fff;font-size:15px;margin-bottom:10px;outline:none"><div class="flex gap10 mb10"><select style="flex:1;padding:12px 14px;border-radius:10px;border:1px solid #2c2c2e;background:#000;color:#fff;font-size:15px;outline:none"><option>Etsy</option><option>Amazon</option><option>Shopify</option><option>eBay</option></select><input type="number" placeholder="Your price" style="flex:1;padding:12px 14px;border-radius:10px;border:1px solid #2c2c2e;background:#000;color:#fff;font-size:15px;outline:none"></div><button onclick="toggleAdd()" style="width:100%;padding:14px;border-radius:10px;border:none;background:#34d399;color:#000;font-size:16px;font-weight:700">Start Tracking</button></div>'}
-
-function renderHome(){
-  var nc=ALERTS.filter(function(a){return a.status==="new"}).length;
-  var bb=$('bell-badge');if(nc>0){bb.style.display='flex';bb.textContent=nc}else bb.style.display='none';
-  var html='';
-  PRODS.forEach(function(p,idx){
-    var c=chg(p.hist),cur=p.hist[p.hist.length-1].p,uc=p.comps.filter(function(x){return x.cp<p.yp}).length;
-    var cc=c.a>=0?"#34d399":"#ff453a",arrow=c.a>=0?"\u2191":"\u2193";
-    html+='<div class="card card-press" onclick="openProduct('+idx+')">'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
-      +'<div style="flex:1;min-width:0"><div class="s11 dim ucase mb4">'+p.plat+'</div><div class="s15 semi mb10 ellip">'+p.name+'</div></div>'
-      +'<div style="text-align:right;flex-shrink:0;margin-left:12px"><div class="s22 bold lsp2">$'+cur.toFixed(2)+'</div><div class="s13 semi mt2" style="color:'+cc+'">'+arrow+' '+Math.abs(c.pc).toFixed(2)+'% today</div></div></div>'
-      +'<div class="mt4">'+miniSVG(p.hist.slice(-14),c.a>=0)+'</div>'
-      +'<div class="flex gap16 mt10 pt14 sep s12"><span class="dim">Your price <span style="color:#fff;font-weight:600">$'+p.yp.toFixed(2)+'</span></span><span class="dim">Undercutting <span style="color:'+(uc>0?'#ff453a':'#34d399')+';font-weight:600">'+uc+'</span></span></div></div>';
-  });
-  $('product-list').innerHTML=html;
+// ── Colors ──
+function numColor(v) {
+  const m = {
+    0: { bg: "#cdc1b4", c: "#776e65" },
+    1: { bg: "#f0eded", c: "#776e65" },
+    2: { bg: "#ede4da", c: "#776e65" },
+    3: { bg: "#f2c88c", c: "#fff" },
+    4: { bg: "#f2b179", c: "#fff" },
+    5: { bg: "#f59563", c: "#fff" },
+    6: { bg: "#f67c5f", c: "#fff" },
+    7: { bg: "#f65e3b", c: "#fff" },
+    8: { bg: "#edcf72", c: "#fff" },
+    9: { bg: "#edc53f", c: "#fff" },
+  };
+  return m[v] || { bg: "#3c3a32", c: "#fff" };
 }
 
-function openProduct(idx){
-  state.selProd=PRODS[idx];state.selComps={};state.visCount=5;state.period="1M";
-  showView('detail');
+// ── Undo system ──
+function saveSnapshot() {
+  undoState = {
+    grid: grid.map(row => row.map(cell => ({ ...cell }))),
+    score, opsUsed, selected
+  };
 }
 
-function drawChart(){
-  var p=state.selProd;if(!p)return;
-  var cvs=$('chart-canvas');if(!cvs)return;
-  var ctx=cvs.getContext('2d');
-  var box=cvs.parentElement;var w=box.clientWidth,h=Math.min(240,w*0.55);
-  var dpr=window.devicePixelRatio||1;
-  cvs.width=w*dpr;cvs.height=h*dpr;cvs.style.width=w+'px';cvs.style.height=h+'px';
-  ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
-
-  var pm={"1D":1,"1W":7,"1M":30,"1Y":30,"ALL":30};
-  var sl=function(d){return d.slice(-(pm[state.period]||30))};
-  var yd=sl(p.hist);
-  var all=yd.map(function(x){return x.p}).concat([p.yp]);
-  var selC=p.comps.filter(function(c){return state.selComps[c.id]});
-  selC.forEach(function(c){sl(c.hist).forEach(function(x){all.push(x.p)})});
-  var mn=Math.min.apply(null,all)*0.97,mx=Math.max.apply(null,all)*1.03,rg=mx-mn||1;
-  var toX=function(i,len){return(i/Math.max(1,len-1))*w};
-  var toY=function(pr){return 12+(1-(pr-mn)/rg)*(h-20)};
-  var drawLine=function(data,color,lw){if(data.length<2)return;ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.lineJoin="round";ctx.lineCap="round";data.forEach(function(d,i){var x=toX(i,data.length),y=toY(d.p);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke()};
-  ctx.setLineDash([4,4]);ctx.strokeStyle="rgba(52,211,153,0.25)";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,toY(p.yp));ctx.lineTo(w,toY(p.yp));ctx.stroke();ctx.setLineDash([]);
-  selC.forEach(function(c){drawLine(sl(c.hist),"#ef4444",1.5)});
-  drawLine(yd,"#34d399",2.5);
-  if(yd.length>0){ctx.beginPath();ctx.arc(toX(yd.length-1,yd.length),toY(yd[yd.length-1].p),4,0,Math.PI*2);ctx.fillStyle="#34d399";ctx.fill()}
+function undo() {
+  if (!undoState || gameState !== "playing") return;
+  grid = undoState.grid;
+  score = undoState.score;
+  opsUsed = undoState.opsUsed;
+  selected = null;
+  // Remove last history entry
+  if (moveHistory.length) moveHistory.pop();
+  undoState = null;
+  render();
 }
 
-function toggleLanded(){state.showLanded=!state.showLanded;renderDetail()}
-function setPeriod(t){state.period=t;renderDetail()}
-function toggleComp(id){if(state.selComps[id])delete state.selComps[id];else state.selComps[id]=true;renderDetail()}
-function showMoreComps(){state.visCount+=10;renderDetail()}
-function clearComps(){state.selComps={};renderDetail()}
+// ── Init ──
+function initGame() {
+  grid = [];
+  for (let r = 0; r < SIZE; r++) {
+    grid[r] = [];
+    for (let c = 0; c < SIZE; c++) {
+      if (Math.random() < OP_RATIO) {
+        grid[r][c] = { type: "operation", op: OP_SYMBOLS[Math.floor(Math.random() * 4)] };
+      } else {
+        grid[r][c] = { type: "number", value: Math.floor(Math.random() * 9) + 1, isNew: false };
+      }
+    }
+  }
+  selected = null;
+  score = 0;
+  level = 1;
+  opsUsed = 0;
+  pointTarget = POINT_TARGET;
+  undoState = null;
+  moveHistory = [];
+  showHistory = false;
+  gameState = "menu";
+  render();
+}
 
-function renderDetail(){
-  var p=state.selProd;if(!p)return;
-  var cur=p.hist[p.hist.length-1].p,c=chg(p.hist),yL=p.yp+(p.ys||0);
-  var cc=c.a>=0?"#34d399":"#ff453a",arrow=c.a>=0?"\u2191":"\u2193";
-  var sortedC=p.comps.slice().sort(function(a,b){var at=state.showLanded?a.cp+a.ship:a.cp,bt=state.showLanded?b.cp+b.ship:b.cp;return at-bt});
-  var visC=sortedC.slice(0,state.visCount);
-  var activeC=sortedC.filter(function(x){return state.selComps[x.id]});
+function startGame() {
+  gameState = "playing";
+  render();
+}
 
-  var html='<div style="padding:20px 24px 6px"><div class="s48 bold lsp" style="line-height:1">$'+cur.toFixed(2)+'</div>'
-    +'<div class="flex gap12 mt8 s15"><span class="semi" style="color:'+cc+'">'+arrow+' '+Math.abs(c.pc).toFixed(2)+'% today</span><span style="color:'+cc+'">'+(c.a>=0?"+":"")+'$'+c.a.toFixed(2)+'</span></div></div>'
-    +'<div style="padding:16px 16px 0"><canvas id="chart-canvas"></canvas></div>'
-    +'<div class="flex gap6" style="justify-content:center;padding:16px 20px 0">';
-  ["1D","1W","1M","1Y","ALL"].forEach(function(t){
-    html+='<button onclick="setPeriod(\''+t+'\')" class="pill '+(state.period===t?'pill-on':'pill-off')+'" style="'+(state.period===t?'color:#fff':'')+'">'+t+'</button>';
-  });
-  html+='</div>';
+function nextLevel() {
+  level++;
+  pointTarget = POINT_TARGET + (level - 1) * 5;
+  score = 0;
+  opsUsed = 0;
+  undoState = null;
+  moveHistory = [];
+  showHistory = false;
+  // Regenerate board
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (Math.random() < OP_RATIO) {
+        grid[r][c] = { type: "operation", op: OP_SYMBOLS[Math.floor(Math.random() * 4)] };
+      } else {
+        grid[r][c] = { type: "number", value: Math.floor(Math.random() * 9) + 1, isNew: false };
+      }
+    }
+  }
+  selected = null;
+  gameState = "playing";
+  render();
+}
 
-  if(activeC.length>0){
-    html+='<div class="flex gap16 wrap s12" style="padding:12px 24px 0"><span class="flex center gap6"><span style="width:14px;height:3px;background:#34d399;border-radius:2px;display:inline-block"></span><span class="dim">Your price</span></span><span class="flex center gap6"><span style="width:14px;height:3px;background:#ef4444;border-radius:2px;display:inline-block"></span><span class="dim">'+activeC.length+' competitor'+(activeC.length>1?'s':'')+'</span></span></div>';
+function isAdj(r1, c1, r2, c2) {
+  return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
+}
+
+function doOp(a, b, op) {
+  if (op === '+') return a + b;
+  if (op === '−') return Math.abs(a - b);
+  if (op === '×') return a * b;
+  if (op === '÷') {
+    if (b === 0) return null;
+    return Math.round(a / b);
+  }
+  return null;
+}
+
+// ── Tile replacement ──
+function replaceWithDigits(r, c, result) {
+  // Zero creates a persistent blank space
+  if (result === 0) {
+    grid[r][c] = { type: "blank" };
+    return;
   }
 
-  // My product card
-  html+='<div style="padding:20px 20px 0"><div class="card" style="padding:18px 20px;margin-bottom:10px">'
-    +'<div class="row mb14"><span class="s17 bold">My product</span><span style="background:#2c2c2e;padding:5px 12px;border-radius:14px;font-size:13px;font-weight:600;color:#8e8e93">Details</span></div>'
-    +'<div class="flex mb16" style="justify-content:space-between"><div><div class="s24 bold green">$'+p.yp.toFixed(2)+'</div><div class="s13 dim mt2">Your price</div></div>'
-    +'<div class="right"><div class="s24 bold" style="color:'+(cur<p.yp?'#ff453a':'#34d399')+'">'+(cur>=p.yp?'+':'')+'$'+(cur-p.yp).toFixed(2)+'</div><div class="s13 dim mt2">vs. market</div></div></div>'
-    +'<div class="sep pt14">'
-    +'<div class="row mb10 s15"><span class="dim">Market price $</span><span class="semi">$'+cur.toFixed(2)+'</span></div>'
-    +'<div class="row mb10 s15"><span class="dim">Your shipping</span><span class="semi" style="color:'+(p.ys===0?'#34d399':'#fff')+'">'+(p.ys===0?'Free':'$'+p.ys.toFixed(2))+'</span></div>'
-    +'<div class="row mb10 s15"><span class="dim">Your landed price</span><span class="bold green">$'+yL.toFixed(2)+'</span></div>'
-    +'<div class="row s15"><span class="dim">Position</span><span class="semi" style="color:'+(cur<p.yp?'#ff453a':'#34d399')+'">'+(cur<p.yp?'\u2193':'\u2191')+' '+Math.abs(((cur-p.yp)/p.yp)*100).toFixed(2)+'%</span></div>'
-    +'</div></div></div>';
+  const digits = String(result).split('').map(Number);
 
-  // Competitors
-  html+='<div style="padding:10px 20px 0"><div class="card" style="padding:18px 20px">'
-    +'<div class="row mb4"><span class="s17 bold">Competitors</span><span style="background:#2c2c2e;padding:5px 12px;border-radius:14px;font-size:13px;font-weight:600;color:#8e8e93">Sort By</span></div>'
-    +'<div class="row mb16"><div class="s13 dim">'+(state.showLanded?'Lowest Landed Price':'Lowest Sticker Price')+'</div>'
-    +'<button onclick="toggleLanded()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:14px;border:none;background:'+(state.showLanded?'rgba(52,211,153,0.12)':'#2c2c2e')+';color:'+(state.showLanded?'#34d399':'#8e8e93')+';font-size:12px;font-weight:600">'
-    +'<span style="width:28px;height:16px;border-radius:8px;position:relative;display:inline-block;background:'+(state.showLanded?'#34d399':'#48484a')+'"><span style="position:absolute;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;left:'+(state.showLanded?'14':'2')+'px"></span></span>+ Shipping</button></div>';
+  // Place first digit at the operation cell itself
+  // If digit is 0, make it a blank instead of a number tile
+  if (digits[0] === 0) {
+    grid[r][c] = { type: "blank" };
+  } else {
+    grid[r][c] = { type: "number", value: digits[0], isNew: true };
+  }
 
-  visC.forEach(function(comp,i){
-    var isSel=state.selComps[comp.id],cL=comp.cp+comp.ship;
-    var dp=state.showLanded?cL:comp.cp,ca=state.showLanded?yL:p.yp;
-    var diff=((dp-ca)/ca)*100;
-    html+='<div onclick="toggleComp(\''+comp.id+'\')" style="display:flex;align-items:center;padding:13px 0;'+(i>0?'border-top:1px solid #2c2c2e;':'')+'cursor:pointer">'
-      +'<div class="circ" style="width:38px;height:38px;margin-right:12px;flex-shrink:0;background:'+(isSel?'#3b1414':'#2c2c2e')+';border:'+(isSel?'2px solid #ef4444':'2px solid transparent')+';font-size:14px;font-weight:700;color:'+(isSel?'#ef4444':'#8e8e93')+'">'+comp.store.charAt(0)+'</div>'
-      +'<div style="flex:1;min-width:0"><div class="s15 semi ellip" style="color:'+(isSel?'#fff':'#e5e5ea')+'">'+comp.store+'</div>'
-      +'<div class="s11 mt2" style="color:'+(comp.ship===0?'#34d399':'#636366')+'">'+(comp.ship===0?'Free shipping':'+$'+comp.ship.toFixed(2)+' shipping')+'</div></div>'
-      +'<div class="right ml12 shrink0"><div class="s15 bold">$'+dp.toFixed(2)+(state.showLanded?'<span class="s11 dim2" style="font-weight:500;margin-left:3px">landed</span>':'')+'</div>'
-      +'<span class="tag" style="background:'+(diff<0?'rgba(255,69,58,0.15)':'rgba(52,211,153,0.15)')+';color:'+(diff<0?'#ff453a':'#34d399')+'">'+(diff<0?'\u2193':'\u2191')+' '+Math.abs(diff).toFixed(1)+'%</span></div></div>';
-  });
-
-  if(state.visCount<sortedC.length) html+='<button onclick="event.stopPropagation();showMoreComps()" style="width:100%;padding:14px;margin-top:10px;border-radius:10px;border:1px solid #2c2c2e;background:transparent;color:#34d399;font-size:15px;font-weight:600">Show '+Math.min(10,sortedC.length-state.visCount)+' more</button>';
-  if(activeC.length>0) html+='<button onclick="event.stopPropagation();clearComps()" style="width:100%;padding:14px;margin-top:8px;border-radius:10px;border:none;background:#2c2c2e;color:#8e8e93;font-size:14px;font-weight:600">Clear chart ('+activeC.length+' selected)</button>';
-  html+='</div></div>';
-
-  // News cards
-  html+='<div class="flex gap10 scroll-x" style="padding:20px 20px 0">';
-  [{s:"MarketWatch",t:"2D AGO",x:"Price dropped 8% on similar "+p.plat+" listings this week"},{s:"PriceHawk",t:"1H AGO",x:"3 competitors adjusted pricing in the last 24 hours"}].forEach(function(n){
-    html+='<div class="card" style="min-width:240px;flex:0 0 auto"><div class="flex center gap8 mb10"><div class="circ" style="width:28px;height:28px;background:#2c2c2e;font-size:10px;font-weight:700;color:#8e8e93">PH</div><div><div class="s13 semi">'+n.s+'</div><div class="s11 dim">'+n.t+'</div></div></div><div class="s15 semi" style="line-height:1.35">'+n.x+'</div></div>';
-  });
-  html+='</div>';
-
-  $('detail-content').innerHTML=html;
-  setTimeout(drawChart,10);
+  // Place remaining digits in nearest empty/blank-adjacent spots
+  for (let i = 1; i < digits.length; i++) {
+    let placed = false;
+    for (let dist = 1; dist <= SIZE && !placed; dist++) {
+      const candidates = [];
+      for (let dr = -dist; dr <= dist; dr++) {
+        for (let dc = -dist; dc <= dist; dc++) {
+          if (Math.abs(dr) + Math.abs(dc) > dist) continue;
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE &&
+              (grid[nr][nc].type === "empty" || grid[nr][nc].type === "blank")) {
+            candidates.push([nr, nc]);
+          }
+        }
+      }
+      if (candidates.length) {
+        const [pr, pc] = candidates[Math.floor(Math.random() * candidates.length)];
+        if (digits[i] === 0) {
+          grid[pr][pc] = { type: "blank" };
+        } else {
+          grid[pr][pc] = { type: "number", value: digits[i], isNew: true };
+        }
+        placed = true;
+      }
+    }
+    // If no empty/blank spot, overwrite a random number tile
+    if (!placed) {
+      const numTiles = [];
+      for (let rr = 0; rr < SIZE; rr++)
+        for (let cc = 0; cc < SIZE; cc++)
+          if (grid[rr][cc].type === "number" && !(rr === r && cc === c))
+            numTiles.push([rr, cc]);
+      if (numTiles.length) {
+        const [pr, pc] = numTiles[Math.floor(Math.random() * numTiles.length)];
+        if (digits[i] === 0) {
+          grid[pr][pc] = { type: "blank" };
+        } else {
+          grid[pr][pc] = { type: "number", value: digits[i], isNew: true };
+        }
+      }
+    }
+  }
 }
 
-function doAlert(id,action){
-  ALERTS.forEach(function(a){if(a.id===id){
-    if(action==="match")a.status="matched";
-    if(action==="snooze")a.status="snoozed";
-    if(action==="promo"){a.status="promo";a.tp="promo"}
-    if(action==="dismiss")a.status="dismissed";
-  }});renderAlerts();
+// Fill temporary empty cells with new numbers/ops. "blank" cells from 0 results persist.
+// Replacement tiles have a higher 50% chance of being operations.
+const REPLACE_OP_RATIO = 0.5;
+function fillEmptyCells() {
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (grid[r][c].type === "empty") {
+        if (Math.random() < REPLACE_OP_RATIO) {
+          grid[r][c] = { type: "operation", op: OP_SYMBOLS[Math.floor(Math.random() * 4)] };
+        } else {
+          grid[r][c] = { type: "number", value: Math.floor(Math.random() * 9) + 1, isNew: true };
+        }
+      }
+    }
+  }
 }
 
-function setAFilt(f){state.aFilt=f;renderAlerts()}
+// ── Loss detection: can any number reach an operation or locked tile? ──
+function canAnyOperate() {
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (grid[r][c].type !== "number") continue;
+      // Check if this number is adjacent to an op, locked, or blank/empty (could path to op)
+      for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+        const nr = r + dr, nc = c + dc;
+        if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) continue;
+        const t = grid[nr][nc].type;
+        if (t === "operation" || t === "locked") return true;
+      }
+    }
+  }
+  // Also check: are there any operations or locked tiles at all?
+  let hasOp = false;
+  for (let r = 0; r < SIZE; r++)
+    for (let c = 0; c < SIZE; c++)
+      if (grid[r][c].type === "operation" || grid[r][c].type === "locked") hasOp = true;
+  if (!hasOp) return false;
 
-function renderAlerts(){
-  var nc=ALERTS.filter(function(a){return a.status==="new"}).length;
-  $('alert-count').textContent=nc>0?nc+" new":"";$('alert-count').style.display=nc>0?"inline":"none";
-
-  var filts=[{k:"all",l:"All",c:""},{k:"drop",l:"Price Drops",c:"#ff453a"},{k:"promo",l:"Promos",c:"#ff9f0a"},{k:"noise",l:"Noise",c:"#636366"}];
-  $('alert-filters').innerHTML=filts.map(function(f){
-    var on=state.aFilt===f.k;return'<button onclick="setAFilt(\''+f.k+'\')" class="pill '+(on?'pill-on':'pill-off')+'" style="color:'+(on?(f.c||'#fff'):'#8e8e93')+'">'+f.l+'</button>';
-  }).join('');
-
-  var drops=ALERTS.filter(function(a){return a.tp==="drop"&&a.status==="new"}).length;
-  var promos=ALERTS.filter(function(a){return a.tp==="promo"}).length;
-  var noise=ALERTS.filter(function(a){return a.tp==="noise"}).length;
-  $('alert-summary').innerHTML='<div style="background:#1c1c1e;border-radius:12px;padding:14px 16px;border-left:3px solid #34d399"><div class="s13 dim mb4">Smart Summary</div><div class="s14" style="font-weight:500;line-height:1.45">'+drops+' real price drops need attention. '+promos+' promos auto-tagged. '+noise+' noise auto-dismissed.</div></div>';
-
-  var fa=state.aFilt==="all"?ALERTS:ALERTS.filter(function(a){return a.tp===state.aFilt});
-  if(fa.length===0){$('alert-list').innerHTML='<div style="text-align:center;padding:40px;color:#636366;font-size:14px">No alerts here</div>';return}
-
-  var html='';
-  fa.forEach(function(a){
-    var ts=tpS(a.tp),ss=stB(a.status),lo=a.op+a.sh,ln=a.np+a.sh,isNew=a.status==="new";
-    html+='<div class="card" style="border-left:3px solid '+ts.c+';opacity:'+(a.status==="dismissed"||a.status==="snoozed"?'0.55':'1')+'">'
-      +'<div class="row mb10"><div class="flex center gap8"><span class="badge" style="background:'+ts.bg+';color:'+ts.c+'">'+ts.i+' '+ts.l+'</span><span class="s11 dim2">'+a.cf+'% conf.</span></div><span class="s12 dim2">'+ago(a.ts)+'</span></div>'
-      +'<div class="s15 semi mb2">'+a.st+'</div><div class="s12 dim mb10">'+a.pn+'</div>'
-      +'<div class="flex center gap10" style="background:#000;border-radius:10px;padding:10px 14px;margin-bottom:8px">'
-      +'<div style="flex:1"><div class="s11 dim2 mb2">Sticker</div><div class="s15 semi"><span class="strike">$'+a.op.toFixed(2)+'</span> \u2192 <span style="color:'+ts.c+'">$'+a.np.toFixed(2)+'</span></div></div>'
-      +'<div style="width:1px;height:32px;background:#2c2c2e"></div>'
-      +'<div style="flex:1"><div class="s11 dim2 mb2">Landed '+(a.sh>0?'(+$'+a.sh.toFixed(2)+' ship)':'(free ship)')+'</div><div class="s15 bold"><span class="strike">$'+lo.toFixed(2)+'</span> \u2192 <span style="color:#fff">$'+ln.toFixed(2)+'</span></div></div></div>'
-      +'<div class="s12 dim ital" style="line-height:1.4;margin-bottom:'+(isNew?'12':'4')+'px;padding:6px 0">'+a.rs+'</div>';
-    if(ss&&!isNew)html+='<div class="badge" style="background:'+ss.bg+';color:'+ss.c+';font-weight:600">\u2713 '+ss.l+'</div>';
-    if(isNew)html+='<div class="action-row"><button class="action-btn" onclick="doAlert(\''+a.id+'\',\'match\')" style="background:#34d399;color:#000">Match Price</button><button class="action-ghost" onclick="doAlert(\''+a.id+'\',\'snooze\')" style="color:#8e8e93">Snooze 7d</button><button class="action-ghost" onclick="doAlert(\''+a.id+'\',\''+(a.tp==="promo"?"dismiss":"promo")+'\')" style="color:'+(a.tp==="promo"?"#636366":"#ff9f0a")+'">'+(a.tp==="promo"?"Dismiss":"It\'s a Promo")+'</button></div>';
-    html+='</div>';
-  });
-  $('alert-list').innerHTML=html;
+  // Check if any number can reach an op through blank spaces (BFS)
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (grid[r][c].type !== "number") continue;
+      // BFS from this number through blanks
+      const visited = new Set();
+      const queue = [[r, c]];
+      visited.add(`${r},${c}`);
+      while (queue.length) {
+        const [cr, cc] = queue.shift();
+        for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+          const nr = cr + dr, nc = cc + dc;
+          const key = `${nr},${nc}`;
+          if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) continue;
+          if (visited.has(key)) continue;
+          visited.add(key);
+          const t = grid[nr][nc].type;
+          if (t === "operation" || t === "locked") return true;
+          if (t === "blank") queue.push([nr, nc]);
+        }
+      }
+    }
+  }
+  return false;
 }
 
-renderHome();
+// ── Click handling ──
+function handleClick(r, c) {
+  if (gameState !== "playing") return;
+  const cell = grid[r][c];
+
+  if (selected) {
+    const sr = selected.row, sc = selected.col;
+    const sel = grid[sr][sc];
+
+    // Deselect
+    if (sr === r && sc === c) {
+      selected = null;
+      render(); return;
+    }
+
+    // Must be adjacent for everything
+    if (!isAdj(sr, sc, r, c)) {
+      // If clicking another number, select it instead
+      if (cell.type === "number") {
+        selected = { row: r, col: c };
+        render(); return;
+      }
+      selected = null;
+      render(); return;
+    }
+
+    // Number → empty/blank: move into it
+    if ((cell.type === "empty" || cell.type === "blank") && sel.type === "number") {
+      saveSnapshot();
+      moveHistory.push({ type: "move", desc: `Moved ${sel.value} to [${r},${c}]`, points: 0, scoreAfter: score });
+      grid[r][c] = { ...sel, isNew: false };
+      if (cell.type === "blank") {
+        // Moving into a blank: leave a blank behind (blanks persist)
+        grid[sr][sc] = { type: "blank" };
+      } else {
+        // Moving into a temporary empty: leave empty (will auto-fill)
+        grid[sr][sc] = { type: "empty" };
+        fillEmptyCells();
+      }
+      selected = null;
+      render(); return;
+    }
+
+    // Number → operation: lock it
+    if (cell.type === "operation" && sel.type === "number") {
+      saveSnapshot();
+      moveHistory.push({ type: "lock", desc: `Locked ${sel.value} onto ${cell.op}`, points: 0, scoreAfter: score });
+      grid[r][c] = { type: "locked", op: cell.op, value: sel.value };
+      grid[sr][sc] = { type: "empty" };
+      fillEmptyCells();
+      selected = null;
+      render(); return;
+    }
+
+    // Number → locked: complete the operation
+    if (cell.type === "locked" && sel.type === "number") {
+      saveSnapshot();
+      const result = doOp(cell.value, sel.value, cell.op);
+      const opSymbol = cell.op;
+      const a = cell.value, b = sel.value;
+
+      grid[sr][sc] = { type: "empty" };
+
+      if (result !== null && result !== undefined && result >= 0) {
+        const absResult = Math.abs(Math.round(result));
+        const isEven = absResult % 2 === 0;
+        let pts = 0;
+
+        if (absResult === 0) {
+          // Zero result: +1 point (even), show purple 0
+          score++; pts = +1;
+          showFloat(r, c, `0`, "float-zero", 22);
+        } else if (isEven) {
+          score++; pts = +1;
+          showFloat(r, c, `+1`, "float-plus", 18);
+        } else {
+          score--; pts = -1;
+          showFloat(r, c, `−1`, "float-minus", 18);
+        }
+
+        showFloat(r, c, `${a} ${opSymbol} ${b} = ${absResult}`, "float-result", 13, -24);
+        moveHistory.push({ type: "op", desc: `${a} ${opSymbol} ${b} = ${absResult}`, points: pts, scoreAfter: score, even: isEven });
+
+        replaceWithDigits(r, c, absResult);
+      } else {
+        // Bad division or error — lose a point
+        score--;
+        showFloat(r, c, `−1`, "float-minus", 18);
+        grid[r][c] = { type: "operation", op: opSymbol };
+        moveHistory.push({ type: "op", desc: `${a} ${opSymbol} ${b} = error`, points: -1, scoreAfter: score, even: false });
+      }
+
+      selected = null;
+      opsUsed++;
+      fillEmptyCells();
+
+      // Check win
+      if (score >= pointTarget) {
+        setTimeout(() => { gameState = "won"; render(); }, 400);
+      }
+      // Check loss — no operations possible
+      else if (!canAnyOperate()) {
+        setTimeout(() => { gameState = "lost"; render(); }, 400);
+      }
+
+      render(); return;
+    }
+
+    // Number → number: swap select
+    if (cell.type === "number") {
+      selected = { row: r, col: c };
+      render(); return;
+    }
+
+    selected = null;
+    render(); return;
+  }
+
+  // Nothing selected
+  if (cell.type === "number") {
+    // Continuous operation: check if this number is adjacent to a locked tile
+    for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && grid[nr][nc].type === "locked") {
+        // Auto-complete: select this number, then trigger the locked tile
+        selected = { row: r, col: c };
+        handleClick(nr, nc);
+        return;
+      }
+    }
+    // No adjacent locked tile — normal select
+    selected = { row: r, col: c };
+    render();
+  }
+}
+
+// ── Valid moves ──
+function getValidMoves() {
+  if (!selected) return new Set();
+  const sr = selected.row, sc = selected.col;
+  const moves = new Set();
+  for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+    const nr = sr + dr, nc = sc + dc;
+    if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+      const t = grid[nr][nc].type;
+      if (t === "empty" || t === "blank" || t === "operation" || t === "locked") {
+        moves.add(`${nr},${nc}`);
+      }
+    }
+  }
+  return moves;
+}
+
+// ── Floats ──
+function showFloat(r, c, text, cls, size, offsetY = 0) {
+  if (!boardEl) return;
+  const el = document.createElement("div");
+  el.className = `float-text ${cls}`;
+  el.textContent = text;
+  el.style.fontSize = size + "px";
+  el.style.left = (3 + c * (CELL + 3) + CELL / 2 - 20) + "px";
+  el.style.top = (3 + r * (CELL + 3) + offsetY) + "px";
+  boardEl.appendChild(el);
+  setTimeout(() => el.remove(), 1100);
+}
+
+// ── Render ──
+function render() {
+  const app = document.getElementById("app");
+  const valid = getValidMoves();
+  let h = "";
+
+  h += `<div class="title">Mod2</div>`;
+  h += `<div class="subtitle">even gains · odd drains</div>`;
+
+  h += `<div class="info-row">
+    <div class="stat-box">
+      <span class="stat-label">Score</span>
+      <span class="stat-value ${score < 0 ? 'negative' : ''}">${score}</span>
+    </div>
+    <div class="target-box">
+      <span class="target-label">Goal</span>
+      <span class="target-value">${pointTarget}</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">Ops</span>
+      <span class="stat-value">${opsUsed}</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">Level</span>
+      <span class="stat-value">${level}</span>
+    </div>
+  </div>`;
+
+  // Progress bar
+  const pct = Math.max(0, Math.min(100, (score / pointTarget) * 100));
+  const barColor = score < 0 ? '#e74c3c' : score >= pointTarget ? '#22c55e' : '#6366f1';
+  h += `<div class="progress-wrap" style="max-width:${BOARD_PX}px;">
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:${pct}%;background:${barColor};"></div>
+    </div>
+  </div>`;
+
+  // Rules reminder
+  h += `<div class="rule-row">
+    <span class="rule-even">Even result → +1</span>
+    <span class="rule-odd">Odd result → −1</span>
+  </div>`;
+
+  // Board
+  h += `<div class="board-wrap"><div class="board" id="board" style="grid-template-columns:repeat(${SIZE},${CELL}px);grid-template-rows:repeat(${SIZE},${CELL}px);width:${BOARD_PX}px;">`;
+
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const cell = grid[r][c];
+      const isValid = valid.has(`${r},${c}`);
+      const isSel = selected && selected.row === r && selected.col === c;
+
+      if (cell.type === "number") {
+        const col = numColor(cell.value);
+        h += `<div class="cell cell-number ${isSel ? 'selected' : ''} ${cell.isNew ? 'new-tile' : ''} ${isValid ? 'valid-move' : ''}"
+          style="width:${CELL}px;height:${CELL}px;background:${col.bg};color:${col.c};font-size:${Math.floor(CELL * 0.48)}px;"
+          onclick="handleClick(${r},${c})">${cell.value}</div>`;
+      }
+      else if (cell.type === "operation") {
+        h += `<div class="cell cell-operation ${isValid ? 'valid-move' : ''}"
+          style="width:${CELL}px;height:${CELL}px;font-size:${Math.floor(CELL * 0.45)}px;"
+          onclick="handleClick(${r},${c})">${cell.op}</div>`;
+      }
+      else if (cell.type === "locked") {
+        h += `<div class="cell cell-locked ${isValid ? 'valid-move' : ''}"
+          style="width:${CELL}px;height:${CELL}px;"
+          onclick="handleClick(${r},${c})">
+          <span class="locked-num" style="font-size:${Math.floor(CELL * 0.34)}px;">${cell.value}</span>
+          <span class="locked-op" style="font-size:${Math.floor(CELL * 0.2)}px;">${cell.op} ?</span>
+        </div>`;
+      }
+      else if (cell.type === "blank") {
+        // Persistent blank from a 0 result — can move into
+        h += `<div class="cell cell-blank ${isValid ? 'valid-move' : ''}"
+          style="width:${CELL}px;height:${CELL}px;"
+          onclick="handleClick(${r},${c})"></div>`;
+      }
+      else {
+        // Temporary empty (gets auto-filled)
+        h += `<div class="cell cell-empty"
+          style="width:${CELL}px;height:${CELL}px;"></div>`;
+      }
+    }
+  }
+  h += `</div>`; // board
+
+  // Menu overlay
+  if (gameState === "menu") {
+    h += `<div class="overlay">
+      <div class="overlay-icon">🧮</div>
+      <div class="overlay-title">Mod2</div>
+      <div class="overlay-text">
+        Tap a <strong>number</strong>, then tap an adjacent <span style="color:#6366f1;font-weight:600">operation</span> to lock it in.
+        Tap another adjacent number to complete the math.<br><br>
+        <span style="color:#3b82f6;font-weight:600">Even result</span> → +1 point &nbsp;
+        <span style="color:#e74c3c;font-weight:600">Odd result</span> → −1 point<br>
+        <strong>Result of 0</strong> → opens a space to move through!
+      </div>
+      <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+    </div>`;
+  }
+
+  // Win overlay
+  if (gameState === "won") {
+    h += `<div class="overlay">
+      <div class="overlay-icon">🎉</div>
+      <div class="overlay-title">Level ${level} Complete!</div>
+      <div class="overlay-text">
+        Reached ${pointTarget} points in <strong style="color:#6366f1">${opsUsed}</strong> operation${opsUsed !== 1 ? 's' : ''}!<br>
+        ${opsUsed <= pointTarget ? '<span style="color:#22c55e;font-weight:600">Efficient! 🔥</span>' : 'Can you do it in fewer moves?'}
+      </div>
+      <button class="btn btn-primary" onclick="nextLevel()">Next Level →</button>
+      <button class="btn btn-secondary" onclick="level=0;score=0;opsUsed=0;initGame();startGame();">Restart</button>
+    </div>`;
+  }
+
+  // Loss overlay
+  if (gameState === "lost") {
+    h += `<div class="overlay">
+      <div class="overlay-icon">💥</div>
+      <div class="overlay-title">No Moves Left!</div>
+      <div class="overlay-text">
+        No numbers can reach an operation.<br>
+        Score: <strong>${score}</strong> / ${pointTarget}<br>
+        Operations used: <strong>${opsUsed}</strong>
+      </div>
+      <button class="btn btn-primary" onclick="opsUsed=0;score=0;initGame();startGame();">Try Again</button>
+    </div>`;
+  }
+
+  h += `</div>`; // board-wrap
+
+  // Action buttons
+  h += `<div class="action-row">
+    <button class="btn-small ${undoState ? '' : 'disabled'}" onclick="undo()">↩ Undo</button>
+    <button class="btn-small ${showHistory ? 'active' : ''}" onclick="showHistory=!showHistory;render();">📋 History</button>
+  </div>`;
+
+  // History panel
+  if (showHistory) {
+    h += `<div class="history-panel">`;
+    if (moveHistory.length === 0) {
+      h += `<div class="history-empty">No moves yet</div>`;
+    } else {
+      for (let i = moveHistory.length - 1; i >= 0; i--) {
+        const m = moveHistory[i];
+        const ptsClass = m.points > 0 ? 'pos' : m.points < 0 ? 'neg' : 'neutral';
+        const ptsStr = m.points > 0 ? `+${m.points}` : m.points < 0 ? `${m.points}` : '—';
+        h += `<div class="history-item">
+          <span class="history-desc">${m.desc}</span>
+          <span class="history-pts ${ptsClass}">${ptsStr}</span>
+          <span class="history-score">= ${m.scoreAfter}</span>
+        </div>`;
+      }
+    }
+    h += `</div>`;
+  }
+
+  // Rules
+  h += `<div class="rules"><ol>
+    <li>Tap a <strong>number</strong>, then tap an adjacent <strong style="color:#6366f1">operation</strong> (+, −, ×, ÷) to lock it in</li>
+    <li>Tap another adjacent <strong>number</strong> to complete the math — the result splits into digit tiles</li>
+    <li><span style="color:#3b82f6;font-weight:600">Even results</span> score +1 point, <span style="color:#e74c3c;font-weight:600">odd results</span> cost −1 point</li>
+    <li>A result of <strong>0</strong> creates a blank space — move tiles through blanks to reposition</li>
+    <li>Reach the <strong style="color:#6366f1">goal score</strong> to advance — if you run out of operations, it's game over</li>
+  </ol></div>`;
+
+  app.innerHTML = h;
+  boardEl = document.getElementById("board");
+
+  // Clear isNew
+  setTimeout(() => {
+    for (let r = 0; r < SIZE; r++)
+      for (let c = 0; c < SIZE; c++)
+        if (grid[r][c].isNew) grid[r][c].isNew = false;
+  }, 300);
+}
+
+initGame();
 </script>
 </body>
 </html>
