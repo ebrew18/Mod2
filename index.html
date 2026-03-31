@@ -282,9 +282,16 @@ const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 function isAdj(r1,c1,r2,c2){ return Math.abs(r1-r2)+Math.abs(c1-c2)===1; }
 
 function enforceMinOps(){
-  const g=S.cfg.g; let freeOps=0;
-  for(let r=0;r<g;r++) for(let c=0;c<g;c++){ const t=S.board[r][c]; if(t&&t.type==='op'&&t.fn===null) freeOps++; }
+  const g=S.cfg.g; let freeOps=0, numCount=0;
+  for(let r=0;r<g;r++) for(let c=0;c<g;c++){
+    const t=S.board[r][c];
+    if(t&&t.type==='op'&&t.fn===null) freeOps++;
+    if(t&&t.type==='num') numCount++;
+  }
   if(freeOps>=S.cfg.minOps) return;
+  // Don't convert if we'd drop below 3 numbers (need 2 to play + buffer)
+  const canConvert=numCount-3;
+  if(canConvert<=0) return;
   let cands=[];
   for(let r=0;r<g;r++) for(let c=0;c<g;c++){
     if(S.board[r][c]&&S.board[r][c].type==='num'){
@@ -295,9 +302,10 @@ function enforceMinOps(){
   const nonRes=cands.filter(cd=>!S.resultCells.some(rc=>rc.r===cd.r&&rc.c===cd.c));
   const pool=nonRes.length>0?nonRes:cands;
   pool.sort((a,b)=>b.adj-a.adj);
-  for(let i=0;i<pool.length&&freeOps<S.cfg.minOps;i++){
+  let converted=0;
+  for(let i=0;i<pool.length&&freeOps<S.cfg.minOps&&converted<canConvert;i++){
     const {r,c}=pool[i];
-    if(S.board[r][c]&&S.board[r][c].type==='num'){ S.board[r][c]={type:'op',value:OPS[ri(0,3)],fn:null}; freeOps++; }
+    if(S.board[r][c]&&S.board[r][c].type==='num'){ S.board[r][c]={type:'op',value:OPS[ri(0,3)],fn:null}; freeOps++; converted++; }
   }
 }
 
@@ -310,16 +318,18 @@ function initLvl(l){
   document.documentElement.style.setProperty('--board-size',sz[g]||sz[12]);
   S.board=[];
   for(let r=0;r<g;r++){S.board[r]=[];for(let c=0;c<g;c++){ S.board[r][c]={type:'num',value:ri(1,S.cfg.mx)}; }}
-  const totalCells=g*g, opCount=Math.max(g+1, Math.round(totalCells * S.cfg.initOpRatio));
+  const totalCells=g*g, maxOps=totalCells-4, opCount=Math.min(Math.max(g+1, Math.round(totalCells * S.cfg.initOpRatio)), maxOps);
   const indices=[]; for(let i=0;i<totalCells;i++) indices.push(i);
   for(let i=indices.length-1;i>0;i--){const j=ri(0,i);[indices[i],indices[j]]=[indices[j],indices[i]];}
   let placed=0;
-  for(let i=0;i<indices.length&&placed<opCount&&placed<totalCells-3;i++){
+  for(let i=0;i<indices.length&&placed<opCount;i++){
     const idx=indices[i], r=Math.floor(idx/g), c=idx%g;
     const dirs=[[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
     if(dirs.some(([nr,nc])=>nr>=0&&nr<g&&nc>=0&&nc<g&&S.board[nr][nc]&&S.board[nr][nc].type==='num')){ S.board[r][c]={type:'op',value:OPS[ri(0,3)],fn:null}; placed++; }
   }
   render(); renderHistory();
+  // Safety check — if board generated unplayable, trigger game over
+  if(!hasMovesLeft()) setTimeout(()=>showGameOver(), 300);
 }
 
 function render(){
@@ -464,11 +474,19 @@ function tapBlank(r,c){
 
 function hasMovesLeft(){
   const g=S.cfg.g;
+  // Count numbers on the board — need at least 2 for any operation
+  let numCount=0;
+  for(let r=0;r<g;r++) for(let c=0;c<g;c++){
+    if(S.board[r][c]&&S.board[r][c].type==='num') numCount++;
+  }
+  if(numCount<2) return false;
+  // If an op is waiting for a second number, check it has an adjacent one
   if(S.opL){
     const dirs=[[S.opL.r-1,S.opL.c],[S.opL.r+1,S.opL.c],[S.opL.r,S.opL.c-1],[S.opL.r,S.opL.c+1]];
     for(const [nr,nc] of dirs){ if(nr>=0&&nr<g&&nc>=0&&nc<g&&S.board[nr][nc]&&S.board[nr][nc].type==='num') return true; }
     return false;
   }
+  // Check if any free op has at least 1 adjacent number
   for(let r=0;r<g;r++) for(let c=0;c<g;c++){
     const t=S.board[r][c];
     if(t&&t.type==='op'&&t.fn===null){
