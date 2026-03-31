@@ -54,6 +54,9 @@
   /* Cells */
   .cell { border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative; transition: transform 0.15s ease; background: rgba(50,32,20,0.35); border: 1px solid rgba(80,55,35,0.15); overflow: visible; }
   .cell.empty { background: rgba(50,32,20,0.2); border-color: rgba(80,55,35,0.08); }
+  .cell.blank { background: rgba(35,22,14,0.5); border: 1px dashed rgba(155,107,213,0.2); cursor: pointer; }
+  .cell.blank:hover { border-color: rgba(155,107,213,0.4); box-shadow: 0 0 8px rgba(155,107,213,0.1); }
+  .cell.blank::after { content: ''; position: absolute; width: 30%; height: 30%; border-radius: 50%; background: rgba(155,107,213,0.08); }
   .cell.number { background: linear-gradient(145deg, #5E4435, #4D362A); border: 1px solid rgba(201,168,76,0.14); box-shadow: 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06); cursor: pointer; }
   .cell.number:hover { border-color: rgba(201,168,76,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 12px var(--glow), inset 0 1px 0 rgba(255,255,255,0.08); }
   .cell.number .tile-text { font-family: 'Playfair Display', serif; font-weight: 900; font-size: clamp(15px, 3.8vw, 24px); color: #FFF8EE; text-shadow: 0 0 6px rgba(255,248,238,0.3), 0 1px 3px rgba(0,0,0,0.6), 0 0 1px rgba(0,0,0,0.8); letter-spacing: 0.5px; }
@@ -190,7 +193,7 @@
 
 <div class="goal-hint">
   <strong>Select a number</strong> adjacent to an <strong>operation</strong> → tap the op → tap a <strong>second adjacent number</strong>.
-  <strong style="color:var(--pt-blue)">Even = +1</strong> · <strong style="color:var(--pt-red)">Odd = −1</strong> · <strong style="color:var(--pt-purple)">Zero = blank</strong>. Reach the goal to level up.
+  <strong style="color:var(--pt-blue)">Even = +1</strong> · <strong style="color:var(--pt-red)">Odd = −1</strong> · <strong style="color:var(--pt-purple)">Zero = blank tile</strong> you can move into. Reach the goal to level up.
 </div>
 
 <div class="controls">
@@ -216,7 +219,8 @@
       <span><span class="dot red"></span> Odd = −1</span>
       <span><span class="dot purple"></span> Zero = blank</span>
     </div>
-    <p>Reach the <strong>goal score</strong> to level up. The board grows and goals get higher. How far can you climb?</p>
+    <p>A <strong>zero result</strong> leaves blank tiles on the board. Select a number and tap an adjacent blank to <strong>slide it</strong> — use this to reposition numbers strategically.</p>
+    <p>Reach the <strong>goal score</strong> to level up. The board grows and goals get higher. Levels go on forever — how far can you climb?</p>
     <div class="op-legend">
       <div class="op-legend-item"><div class="op-swatch add">+</div> Addition</div>
       <div class="op-legend-item"><div class="op-swatch sub">−</div> Subtraction</div>
@@ -263,7 +267,7 @@ const OPC={'+':'op-add','−':'op-sub','×':'op-mul','÷':'op-div'};
 const OPsym={'+':'+','−':'−','×':'×','÷':'÷'};
 
 function lvlCfg(l){
-  const g=Math.min(3+(l-1),8);
+  const g=Math.min(3+(l-1),12);
   const mx=Math.min(9,5+Math.floor(l*0.7));
   const initOpRatio=Math.max(0.15, 0.50 - (l-1) * 0.06);
   const minOps=Math.max(2, Math.ceil(g * (1.2 - (l-1)*0.08)));
@@ -299,11 +303,11 @@ function enforceMinOps(){
 
 function initLvl(l){
   S.level=l; S.cfg=lvlCfg(l); S.sel=null; S.opL=null; S.resultCells=[]; S.history=[];
-  if(l===1){ S.score=0; S.moves=0; }
+  S.score=0; // Reset score for new level goal
   const g=S.cfg.g;
   document.documentElement.style.setProperty('--grid-cols',g);
-  const sz={3:'min(70vw,340px)',4:'min(76vw,380px)',5:'min(82vw,420px)',6:'min(86vw,460px)',7:'min(90vw,490px)',8:'min(92vw,520px)'};
-  document.documentElement.style.setProperty('--board-size',sz[g]||sz[8]);
+  const sz={3:'min(70vw,340px)',4:'min(76vw,380px)',5:'min(82vw,420px)',6:'min(86vw,460px)',7:'min(90vw,490px)',8:'min(92vw,520px)',9:'min(94vw,560px)',10:'min(96vw,600px)',11:'min(97vw,640px)',12:'min(98vw,680px)'};
+  document.documentElement.style.setProperty('--board-size',sz[g]||sz[12]);
   S.board=[];
   for(let r=0;r<g;r++){S.board[r]=[];for(let c=0;c<g;c++){ S.board[r][c]={type:'num',value:ri(1,S.cfg.mx)}; }}
   const totalCells=g*g, opCount=Math.max(g+1, Math.round(totalCells * S.cfg.initOpRatio));
@@ -323,6 +327,10 @@ function render(){
   for(let r=0;r<g;r++) for(let c=0;c<g;c++){
     const d=document.createElement('div'), t=S.board[r][c];
     if(!t){d.className='cell empty';}
+    else if(t.type==='blank'){
+      d.className='cell blank';
+      d.onclick=()=>tapBlank(r,c);
+    }
     else if(t.type==='num'){
       const isSel=S.sel&&S.sel.r===r&&S.sel.c===c;
       const isRes=S.resultCells.some(rc=>rc.r===r&&rc.c===c);
@@ -380,17 +388,21 @@ function tapNum(r,c){
     const kind=res===0?'zero':res%2===0?'even':'odd';
     S.history.push({expr,res,pts,kind});
 
-    // Clear consumed cells
+    // Clear consumed second-number cell
     S.board[r][c]=null;
 
-    // Result placement: 0 → blank, otherwise place result as number
+    // Save op position for floating indicator before overwriting
+    const opR=S.opL.r, opC=S.opL.c;
+
+    // Result placement: 0 → both cells become blanks, otherwise place result digits
     S.resultCells=[];
     if(res===0){
-      S.board[S.opL.r][S.opL.c]=null; // becomes blank
+      S.board[opR][opC]={type:'blank'};  // persistent blank
+      S.board[r][c]={type:'blank'};       // second cell also blank
     } else {
       const digs=String(res).split('').map(Number);
-      const pl=[{r:S.opL.r,c:S.opL.c}];
-      const nb=[[S.opL.r-1,S.opL.c],[S.opL.r+1,S.opL.c],[S.opL.r,S.opL.c-1],[S.opL.r,S.opL.c+1]].filter(n=>n.r>=0&&n.r<g&&n.c>=0&&n.c<g&&!S.board[n.r][n.c]);
+      const pl=[{r:opR,c:opC}];
+      const nb=[[opR-1,opC],[opR+1,opC],[opR,opC-1],[opR,opC+1]].filter(n=>n.r>=0&&n.r<g&&n.c>=0&&n.c<g&&!S.board[n.r][n.c]);
       for(let i=1;i<digs.length&&i<=nb.length;i++) pl.push(nb[i-1]);
       for(let i=0;i<digs.length&&i<pl.length;i++){
         S.board[pl[i].r][pl[i].c]={type:'num',value:digs[i],merged:true};
@@ -398,25 +410,21 @@ function tapNum(r,c){
       }
     }
 
-    // Refill empties
-    for(let rr=0;rr<g;rr++) for(let cc=0;cc<g;cc++) if(!S.board[rr][cc]) S.board[rr][cc]=Math.random()<S.cfg.refillOp?{type:'op',value:OPS[ri(0,3)],fn:null}:{type:'num',value:ri(1,S.cfg.mx)};
+    // Refill only truly empty (null) cells — blanks persist
+    for(let rr=0;rr<g;rr++) for(let cc=0;cc<g;cc++) if(S.board[rr][cc]===null) S.board[rr][cc]=Math.random()<S.cfg.refillOp?{type:'op',value:OPS[ri(0,3)],fn:null}:{type:'num',value:ri(1,S.cfg.mx)};
     enforceMinOps();
+
+    // Capture indicator position before clearing state
+    const ptCellIdx=S.resultCells.length>0?(S.resultCells[0].r*g+S.resultCells[0].c):(opR*g+opC);
+    const ptVal=pts;
+
     S.moves++; S.opL=null; S.sel=null;
     render(); renderHistory();
 
-    // Floating indicator on the op cell position
+    // Floating point indicator
     const boardEl=document.getElementById('board');
-    const cellIdx=S.opL?null:(S.resultCells.length>0?S.resultCells[0]:null);
-    // Get the cell element at the result position
-    const g2=S.cfg.g;
-    const targetIdx=S.resultCells.length>0?(S.resultCells[0].r*g2+S.resultCells[0].c):(res===0?-1:-1);
-    if(targetIdx>=0&&boardEl.children[targetIdx]){
-      showFloatingPt(boardEl.children[targetIdx], pts);
-    } else {
-      // For zero results, show on a nearby cell
-      const opIdx=(S.history.length>0)?-1:-1;
-      // Fallback: show on first cell of board
-      if(boardEl.children.length>0) showFloatingPt(boardEl.children[Math.min(r*g2+c, boardEl.children.length-1)], pts);
+    if(ptCellIdx>=0&&ptCellIdx<boardEl.children.length){
+      showFloatingPt(boardEl.children[ptCellIdx], ptVal);
     }
 
     // Score flash
@@ -439,6 +447,19 @@ function tapOp(r,c){
   S.board[r][c].fn=num.value;
   S.board[S.sel.r][S.sel.c]=Math.random()<S.cfg.refillOp?{type:'op',value:OPS[ri(0,3)],fn:null}:{type:'num',value:ri(1,S.cfg.mx)};
   S.opL={r,c}; S.sel=null; S.resultCells=[]; render();
+}
+
+function tapBlank(r,c){
+  // If a number is selected and adjacent, swap it into the blank
+  if(!S.sel||S.opL) return;
+  const num=S.board[S.sel.r][S.sel.c];
+  if(!num||num.type!=='num') return;
+  if(!isAdj(S.sel.r,S.sel.c,r,c)){ S.sel=null; render(); return; }
+  // Swap: number moves to blank, old position becomes blank
+  S.board[r][c]={type:'num',value:num.value};
+  S.board[S.sel.r][S.sel.c]={type:'blank'};
+  S.sel=null; S.resultCells=[];
+  render();
 }
 
 function hasMovesLeft(){
@@ -475,8 +496,8 @@ function showGameOver(){
 function showLU(){
   const nl=S.level+1, nc=lvlCfg(nl);
   document.getElementById('lu-t').textContent=`Level ${nl}`;
-  const flav=['The board expands','A wider field awaits','Room to maneuver','The challenge deepens','Numbers multiply','Mastery beckons','The grind continues','Beyond the ordinary','Relentless pursuit','Ever upward'];
-  document.getElementById('lu-s').textContent=flav[Math.min(nl-2,flav.length-1)];
+  const flav=['The board expands','A wider field awaits','Room to maneuver','The challenge deepens','Numbers multiply','Mastery beckons','The grind continues','Beyond the ordinary','Relentless pursuit','Ever upward','Into the unknown','The calculus shifts','No rest for the clever','Sharpen your mind','The numbers grow restless','Fortune favors the bold'];
+  document.getElementById('lu-s').textContent=flav[(nl-2)%flav.length];
   document.getElementById('lu-sc').textContent=S.score;
   document.getElementById('lu-gr').textContent=`${nc.g}×${nc.g}`;
   document.getElementById('lu-mv').textContent=S.moves;
@@ -496,4 +517,4 @@ document.getElementById('btn-history').onclick=()=>{
 initLvl(1);
 </script>
 </body>
-                               </html>
+</html>
